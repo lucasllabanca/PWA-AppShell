@@ -1,6 +1,16 @@
-self.addEventListener('install', () => {
+const staticCache = 'app-shell-v1';
+
+const assetsToCache = ['offline.html'];
+
+async function cacheStaticAssets() {
+    const cache = await caches.open(staticCache);
+    return cache.addAll(assetsToCache);
+}
+
+self.addEventListener('install', (event) => {
     console.log('[Service Worker] installing service worker');
-    self.skipWaiting(); //no need to wait
+    event.waitUntil(cacheStaticAssets());
+    self.skipWaiting(); //no need to wait on close open tabs
 });
 
 self.addEventListener('activate', () => {
