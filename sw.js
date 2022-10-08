@@ -7,6 +7,16 @@ async function cacheStaticAssets() {
     return cache.addAll(assetsToCache);
 }
 
+async function networkFirst(request) {
+    try {
+        return await fetch(request);
+    } catch (error) {
+        console.log('[Service Worker] network error', error);
+        const cache = await caches.open(staticCache);
+        return cache.match('offline.html');
+    }
+}
+
 self.addEventListener('install', (event) => {
     console.log('[Service Worker] installing service worker');
     event.waitUntil(cacheStaticAssets());
@@ -20,5 +30,5 @@ self.addEventListener('activate', () => {
 
 self.addEventListener('fetch', (event) => {
     console.log('[Service Worker] Fetch event worker', event.request.url);
-    event.respondWith(fetch(event.request.url));
+    event.respondWith(networkFirst(event.request));
 });
